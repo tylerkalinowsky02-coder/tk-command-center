@@ -249,6 +249,9 @@
     <div id="tb-date"></div>
     <button class="btn btn-p" id="btn-save" onclick="save(1)">Save</button>
     <button class="btn" onclick="loadData()">Load</button>
+    <button class="btn" onclick="exportData()">Export</button>
+    <button class="btn" onclick="document.getElementById('import-file').click()">Import</button>
+    <input type="file" id="import-file" accept="application/json" style="display:none" onchange="importData(this.files[0])">
   </div>
 </div>
 
@@ -330,6 +333,14 @@
     <div id="wk-checks"></div>
     <div class="bar"><div class="bar-f" id="comp-bar" style="width:0%"></div></div>
     <div style="font-size:11px;color:var(--dim);margin-top:11px;">Tap a session to mark it complete — that also commits your logged weights to the trend history.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-t" style="color:var(--slate)">Mobility &amp; Zone 2</div>
+    <div id="mob-row"></div>
+    <div style="height:12px;"></div>
+    <div class="fl" style="margin-bottom:8px;">Zone 2 cardio · easy pace, 25–30 min</div>
+    <div id="z2-row" style="display:flex;gap:7px;"></div>
   </div>
 
   <div class="g2">
@@ -672,45 +683,45 @@ const SPLIT=[
  {k:"D1",day:"Mon",title:"Lower — Squat Strength",emph:"Quads · Glutes · Core",c:"#93A56A",
   ex:[
    {cat:"POWER",cc:"#B0703F",n:"Speed Squat (Dynamic Effort)",s:6,r:"3",rpe:"6",note:"50–60% of your best squat, moved as fast as you can. Explosive intent builds power without impact. 45 sec between sets."},
-   {cat:"STRENGTH",cc:"#C2A265",n:"Back Squat",s:4,r:"4–6",rpe:"8",note:"The anchor. Full depth, brace hard, drive through midfoot."},
-   {cat:"SIZE",cc:"#93A56A",n:"Bulgarian Split Squat",s:3,r:"8–10/leg",rpe:"8",note:"Unilateral size and hip stability. Evens out left/right."},
-   {cat:"SIZE",cc:"#93A56A",n:"Leg Extension",s:3,r:"12–15",rpe:"9",note:"Quad isolation. Slow eccentric, pause at the top."},
-   {cat:"SIZE",cc:"#93A56A",n:"Standing Calf Raise",s:4,r:"10–15",rpe:"9",note:"Full stretch at the bottom, one-second hold at the top."},
+   {cat:"STRENGTH",cc:"#C2A265",n:"Back Squat",s:3,r:"6–8",rpe:"9",note:"The anchor. Fewer sets, closer to failure. Full depth, brace hard, drive through midfoot."},
+   {cat:"SIZE",cc:"#93A56A",n:"Bulgarian Split Squat",s:2,r:"8–10/leg",rpe:"9",note:"Unilateral size and hip stability. Push each set hard — one or two reps in reserve, no more."},
+   {cat:"SIZE",cc:"#93A56A",n:"Leg Extension",s:2,r:"10–12",rpe:"9",note:"Quad isolation. Slow eccentric, pause at the top, take it to near-failure."},
+   {cat:"SIZE",cc:"#93A56A",n:"Standing Calf Raise",s:3,r:"10–12",rpe:"9",note:"Full stretch at the bottom, one-second hold at the top."},
    {cat:"CORE",cc:"#6B8F5E",n:"Hanging Leg Raise",s:3,r:"10–12",rpe:"—",note:"No swing. Lower slowly — the negative is the work."},
   ]},
  {k:"D2",day:"Tue",title:"Upper — Push",emph:"Chest · Shoulders · Triceps",c:"#B0703F",
   ex:[
-   {cat:"STRENGTH",cc:"#C2A265",n:"Barbell Bench Press",s:4,r:"4–6",rpe:"8",note:"Primary chest builder. Controlled descent, explosive drive."},
-   {cat:"SIZE",cc:"#93A56A",n:"Incline DB Press",s:3,r:"8–12",rpe:"8",note:"Upper chest — the shelf that makes a chest look full."},
-   {cat:"SIZE",cc:"#93A56A",n:"Overhead Press",s:3,r:"6–10",rpe:"8",note:"Standing. Glutes tight, ribs down, press straight overhead."},
-   {cat:"SIZE",cc:"#93A56A",n:"Cable Lateral Raise",s:4,r:"12–20",rpe:"9",note:"Side delt width. Drop set the last one — this builds the frame."},
-   {cat:"SIZE",cc:"#93A56A",n:"Cable Fly",s:3,r:"12–15",rpe:"8",note:"Deep stretch, squeeze at the midline."},
-   {cat:"SIZE",cc:"#93A56A",n:"Overhead Triceps Extension",s:3,r:"10–15",rpe:"9",note:"Long head of the triceps — where arm thickness comes from."},
+   {cat:"STRENGTH",cc:"#C2A265",n:"Barbell Bench Press",s:3,r:"6–8",rpe:"9",note:"Primary chest builder. Fewer sets, more intent per set. Controlled descent, explosive drive."},
+   {cat:"SIZE",cc:"#93A56A",n:"Incline DB Press",s:2,r:"8–10",rpe:"9",note:"Upper chest — the shelf that makes a chest look full. Push each set close to the wall."},
+   {cat:"SIZE",cc:"#93A56A",n:"Overhead Press",s:2,r:"6–10",rpe:"9",note:"Standing. Glutes tight, ribs down, press straight overhead."},
+   {cat:"SIZE",cc:"#93A56A",n:"Cable Lateral Raise",s:3,r:"10–12",rpe:"9",note:"Side delt width. Every set to near-failure — this is where intensity pays off."},
+   {cat:"SIZE",cc:"#93A56A",n:"Cable Fly",s:2,r:"10–12",rpe:"9",note:"Deep stretch, squeeze at the midline."},
+   {cat:"SIZE",cc:"#93A56A",n:"Overhead Triceps Extension",s:2,r:"8–12",rpe:"9",note:"Long head of the triceps — where arm thickness comes from."},
   ]},
  {k:"D3",day:"Thu",title:"Upper — Pull",emph:"Back · Rear Delts · Biceps",c:"#6B8F5E",
   ex:[
-   {cat:"STRENGTH",cc:"#C2A265",n:"Pull-Up",s:4,r:"6–10",rpe:"8",note:"Bodyweight. Progress by adding reps, then adding a set. Dead hang to chin over bar."},
-   {cat:"SIZE",cc:"#93A56A",n:"Barbell Row",s:4,r:"6–10",rpe:"8",note:"Mid-back thickness. Torso about 45°, pull to the belly."},
-   {cat:"SIZE",cc:"#93A56A",n:"Chest-Supported DB Row",s:3,r:"10–12",rpe:"8",note:"Strict — chest stays on the pad, no body english."},
-   {cat:"SIZE",cc:"#93A56A",n:"Lat Pulldown (wide)",s:3,r:"10–12",rpe:"8",note:"Second width movement. Drive elbows down and back."},
-   {cat:"SIZE",cc:"#93A56A",n:"Face Pull",s:3,r:"15–20",rpe:"8",note:"Rear delts and shoulder health. Do these religiously."},
-   {cat:"SIZE",cc:"#93A56A",n:"Incline DB Curl → Hammer Curl",s:3,r:"10–15",rpe:"9",note:"Superset. Incline for stretch, hammer for brachialis thickness."},
+   {cat:"STRENGTH",cc:"#C2A265",n:"Pull-Up",s:3,r:"6–10",rpe:"9",note:"Bodyweight. Add load once 10 clean reps are easy. Dead hang to chin over bar."},
+   {cat:"SIZE",cc:"#93A56A",n:"Barbell Row",s:3,r:"6–10",rpe:"9",note:"Mid-back thickness. Torso about 45°, pull to the belly."},
+   {cat:"SIZE",cc:"#93A56A",n:"Chest-Supported DB Row",s:2,r:"10–12",rpe:"9",note:"Strict — chest stays on the pad, no body english."},
+   {cat:"SIZE",cc:"#93A56A",n:"Lat Pulldown (wide)",s:2,r:"10–12",rpe:"9",note:"Second width movement. Drive elbows down and back."},
+   {cat:"SIZE",cc:"#93A56A",n:"Face Pull",s:2,r:"10–12",rpe:"9",note:"Rear delts and shoulder health. Do these religiously."},
+   {cat:"SIZE",cc:"#93A56A",n:"Incline DB Curl → Hammer Curl",s:2,r:"8–12",rpe:"9",note:"Superset. Incline for stretch, hammer for brachialis thickness."},
   ]},
  {k:"D4",day:"Fri",title:"Lower — Posterior & Speed",emph:"Hamstrings · Glutes · Sprint",c:"#C2A265",
   ex:[
    {cat:"SPEED",cc:"#B0703F",n:"Sprints — 6 × 30 yd",s:6,r:"30 yd",rpe:"9",note:"Full recovery between reps, about 90 sec. Quality only. This is what makes you fast."},
-   {cat:"STRENGTH",cc:"#C2A265",n:"Trap Bar Deadlift",s:4,r:"3–5",rpe:"8",note:"Explosive concentric. Posterior chain power and total-body strength."},
-   {cat:"SIZE",cc:"#93A56A",n:"Romanian Deadlift",s:3,r:"8–10",rpe:"8",note:"The hamstring stretch is the point. Soft knees, hips back, flat back."},
-   {cat:"SIZE",cc:"#93A56A",n:"Seated Hamstring Curl",s:3,r:"12–15",rpe:"9",note:"Seated version loads the long head harder than lying."},
-   {cat:"SIZE",cc:"#93A56A",n:"Hip Thrust",s:3,r:"10–12",rpe:"8",note:"Glute strength equals sprint speed. Pause one second at lockout."},
+   {cat:"STRENGTH",cc:"#C2A265",n:"Trap Bar Deadlift",s:3,r:"6–8",rpe:"9",note:"Fewer sets, heavier intent. Explosive concentric. Posterior chain power and total-body strength."},
+   {cat:"SIZE",cc:"#93A56A",n:"Romanian Deadlift",s:2,r:"8–10",rpe:"9",note:"The hamstring stretch is the point. Soft knees, hips back, flat back."},
+   {cat:"SIZE",cc:"#93A56A",n:"Seated Hamstring Curl",s:2,r:"10–12",rpe:"9",note:"Seated version loads the long head harder than lying."},
+   {cat:"SIZE",cc:"#93A56A",n:"Hip Thrust",s:2,r:"10–12",rpe:"9",note:"Glute strength equals sprint speed. Pause one second at lockout."},
    {cat:"CORE",cc:"#6B8F5E",n:"Cable Woodchop",s:3,r:"12/side",rpe:"—",note:"High-to-low rotational core. Loaded and progressive — add weight over time."},
   ]},
  {k:"D5",day:"Sat",title:"Full Body — Athletic",emph:"Power · Conditioning · Core",c:"#8E9089",
   ex:[
    {cat:"POWER",cc:"#B0703F",n:"Single-Arm DB Snatch",s:4,r:"5/side",rpe:"7",note:"Floor to overhead in one pull. Full-body explosive, unilateral, athletic. Light and fast."},
-   {cat:"STRENGTH",cc:"#C2A265",n:"Front Squat or Push Press",s:3,r:"5–6",rpe:"7–8",note:"Alternate weekly. Both build the brace-and-drive pattern that transfers to sport."},
-   {cat:"SIZE",cc:"#93A56A",n:"Weighted Dip or Incline DB Press",s:3,r:"8–12",rpe:"8",note:"Third chest exposure of the week — chest responds to frequency."},
-   {cat:"SIZE",cc:"#93A56A",n:"Single-Arm DB Row",s:3,r:"10–12/side",rpe:"8",note:"Third back exposure. Full stretch at the bottom, drive the elbow back."},
+   {cat:"STRENGTH",cc:"#C2A265",n:"Front Squat or Push Press",s:3,r:"6–8",rpe:"9",note:"Alternate weekly. Both build the brace-and-drive pattern that transfers to sport."},
+   {cat:"SIZE",cc:"#93A56A",n:"Weighted Dip or Incline DB Press",s:2,r:"8–12",rpe:"9",note:"Third chest exposure of the week — chest responds to frequency."},
+   {cat:"SIZE",cc:"#93A56A",n:"Single-Arm DB Row",s:2,r:"10–12/side",rpe:"9",note:"Third back exposure. Full stretch at the bottom, drive the elbow back."},
    {cat:"ATHLETIC",cc:"#8E9089",n:"Bike or Row Intervals",s:6,r:"20s hard / 40s easy",rpe:"9",note:"Assault bike or rower. Builds work capacity and conditioning without pounding your joints."},
    {cat:"CORE",cc:"#6B8F5E",n:"Cable Crunch + Dead Bug",s:3,r:"12–15 / 8 per side",rpe:"—",note:"Cable crunch is loaded flexion you can progress. Dead bug trains anti-extension control."},
   ]},
@@ -773,6 +784,8 @@ const S={phase:0,day:0,liftDone:{},logs:{},mealChk:{},suppChk:{},grocChk:{},prep
  liftHist:{},   // { "Back Squat":[{d,w,r}] }
  sessions:[],   // [{d:"2026-07-27",k:"D1",title:""}]
  recovery:[],   // [{d, recovery, hrv, rhr, strain, ...}]
+ mobility:{},   // { "2026-08-07": true }
+ z2Done:{},     // { "wed": true, "sun": false }
  pickLift:""};
 const KEY="tk_cc_v6";
 
@@ -890,6 +903,36 @@ function toggleSession(k){
   S.sessions=S.sessions.filter(s=>!(s.d===TODAY()&&s.k===k));
  }
  updComp();R("day",rDay);R("trends",rTrends);save();
+}
+
+// ═══════════ MOBILITY & ZONE 2 ═══════════
+const Z2_DAYS=[{k:"wed",l:"Wed"},{k:"sun",l:"Sun"}];
+function toggleMobility(){
+ const t=TODAY();S.mobility[t]=!S.mobility[t];rMobilityZ2();save();
+}
+function toggleZ2(k){
+ S.z2Done[k]=!S.z2Done[k];rMobilityZ2();save();
+}
+function rMobilityZ2(){
+ const mr=$("mob-row");if(mr){
+  const on=!!S.mobility[TODAY()];
+  mr.innerHTML="";
+  const row=el("div",{class:"citem"+(on?" done":"")});
+  row.innerHTML=`<div class="cbox ${on?"on":""}">${on?"✓":""}</div><div><div class="citem-n">Mobility</div><div class="citem-d">10 min hips, shoulders, ankles — whatever's tight today</div></div>`;
+  row.onclick=toggleMobility;
+  mr.appendChild(row);
+ }
+ const zr=$("z2-row");if(zr){
+  zr.innerHTML="";
+  Z2_DAYS.forEach(d=>{
+   const on=!!S.z2Done[d.k];
+   const c=el("div",{class:"dchk",style:"flex:0 0 auto;min-width:78px;"});
+   c.style.background=on?hx("#5F6B62",.18):"";c.style.borderColor=on?"var(--slate)":"";
+   c.innerHTML=`<div class="dchk-l">${d.l}</div><div class="dchk-b" style="${on?"background:var(--slate);border-color:var(--slate);color:var(--bg)":""}">${on?"✓":""}</div><div class="dchk-t" style="color:${on?"var(--slate)":"var(--dim)"}">Zone 2</div>`;
+   c.onclick=()=>toggleZ2(d.k);
+   zr.appendChild(c);
+  });
+ }
 }
 
 // ═══════════ WEIGH-IN ═══════════
@@ -1497,7 +1540,7 @@ function save(flash){
  try{
   localStorage.setItem(KEY,JSON.stringify({phase:S.phase,liftDone:S.liftDone,logs:S.logs,mealChk:S.mealChk,
    suppChk:S.suppChk,grocChk:S.grocChk,prepChk:S.prepChk,prs:S.prs,bw:S.bw,meas:S.meas,runs:S.runs,golf:S.golf,
-   liftHist:S.liftHist,sessions:S.sessions,recovery:S.recovery,pickLift:S.pickLift,
+   liftHist:S.liftHist,sessions:S.sessions,recovery:S.recovery,mobility:S.mobility,z2Done:S.z2Done,pickLift:S.pickLift,
    ci_sleep:gv("ci-sleep"),ci_ready:gv("ci-ready"),ci_sore:gv("ci-sore"),ci_notes:gv("ci-notes"),
    n_cal:gv("n-cal"),n_pro:gv("n-pro"),n_carb:gv("n-carb"),n_water:gv("n-water"),
    rt_am:gv("rt-am"),rt_pm:gv("rt-pm"),at:new Date().toISOString()}));
@@ -1508,7 +1551,7 @@ function loadData(){
  try{
   const raw=localStorage.getItem(KEY);if(!raw){toast("No saved data","#B0703F");return;}
   const d=JSON.parse(raw);
-  ["liftDone","logs","mealChk","suppChk","grocChk","prepChk","prs","bw","meas","runs","golf","liftHist","sessions","recovery"].forEach(k=>{if(d[k])S[k]=d[k];});
+  ["liftDone","logs","mealChk","suppChk","grocChk","prepChk","prs","bw","meas","runs","golf","liftHist","sessions","recovery","mobility","z2Done"].forEach(k=>{if(d[k])S[k]=d[k];});
   if(typeof d.phase==="number")S.phase=d.phase;
   if(d.pickLift)S.pickLift=d.pickLift;
   sv("ci-sleep",d.ci_sleep);sv("ci-ready",d.ci_ready);sv("ci-sore",d.ci_sore);sv("ci-notes",d.ci_notes);
@@ -1516,11 +1559,39 @@ function loadData(){
   if(d.rt_am)sv("rt-am",d.rt_am);if(d.rt_pm)sv("rt-pm",d.rt_pm);
   R("phase",refreshPhase);R("comp",updComp);R("bw",refreshBW);R("phases",rPhases);
   R("tabs",rDayTabs);R("day",rDay);R("run",rRunHist);R("golf",rGolfHist);
-  R("supp",rSupps);R("groc",rGrocery);R("pr",rPRs);R("chart",drawChart);R("trends",rTrends);R("rec",rRecovery);
+  R("supp",rSupps);R("groc",rGrocery);R("pr",rPRs);R("chart",drawChart);R("trends",rTrends);R("rec",rRecovery);R("mobz2",rMobilityZ2);
   toast("Data loaded","#93A56A");
  }catch(e){toast("Load failed","#B0703F");}
 }
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")save(0);});
+
+// ═══════════ EXPORT / IMPORT (manual cross-device sync) ═══════════
+function exportData(){
+ save(0);
+ const raw=localStorage.getItem(KEY);
+ if(!raw){toast("Nothing to export yet","#B0703F");return;}
+ const blob=new Blob([raw],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");a.href=url;
+ a.download="tk-command-center-"+TODAY()+".json";
+ document.body.appendChild(a);a.click();document.body.removeChild(a);
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
+ toast("Exported — AirDrop or email this file to your other device","#93A56A");
+}
+function importData(file){
+ if(!file)return;
+ const r=new FileReader();
+ r.onload=()=>{
+  try{
+   JSON.parse(r.result); // validate it's real JSON before overwriting
+   localStorage.setItem(KEY,r.result);
+   loadData();
+   toast("Imported — this device is now up to date","#93A56A");
+  }catch(e){toast("That file didn't look right — import failed","#B0703F");}
+ };
+ r.onerror=()=>toast("Couldn't read that file","#B0703F");
+ r.readAsText(file);
+}
 
 // ═══════════ INIT ═══════════
 window.addEventListener("DOMContentLoaded",()=>{
@@ -1529,7 +1600,7 @@ window.addEventListener("DOMContentLoaded",()=>{
  R("sel",rPhaseSel);R("stats",rHomeStats);R("targ",rHomeTargets);R("wk",rWkChecks);R("comp",updComp);
  R("bw",refreshBW);R("phases",rPhases);R("tn",rTrainNote);R("tabs",rDayTabs);R("day",rDay);
  R("run",rRunHist);R("golf",rGolfHist);R("nut",rNutrition);R("supp",rSupps);R("groc",rGrocery);
- R("pr",rPRs);R("rules",rProgRules);R("chart",drawChart);R("trends",rTrends);R("remind",rRemind);R("rec",rRecovery);
+ R("pr",rPRs);R("rules",rProgRules);R("chart",drawChart);R("trends",rTrends);R("remind",rRemind);R("rec",rRecovery);R("mobz2",rMobilityZ2);
  initPWA();
 });
 </script>
